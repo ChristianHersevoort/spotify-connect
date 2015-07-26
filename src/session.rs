@@ -4,6 +4,7 @@ use protobuf::{self, Message};
 use rand::thread_rng;
 use std::sync::{Mutex, Arc, Future, mpsc};
 use std::path::PathBuf;
+use std::fmt;
 
 use connection::{self, PlainConnection, CipherConnection};
 use keys::PrivateKeys;
@@ -158,9 +159,12 @@ impl Session {
         let (cmd, data) =
             self.rx_connection.lock().unwrap().recv_packet().unwrap();
 
+        let message = fmt::format(format_args!("Command 0x{cmd:x}", cmd=cmd));
+        trace!("{}", message);
+
         match cmd {
             0x4 => self.send_packet(0x49, &data).unwrap(),
-            0x4a => (),
+            0x4a => (), //Keep alive?
             0x9  => self.stream.lock().unwrap().handle(cmd, data),
             0xd | 0xe => self.audio_key.lock().unwrap().handle(cmd, data),
             0xb2...0xb6 => self.mercury.lock().unwrap().handle(cmd, data),

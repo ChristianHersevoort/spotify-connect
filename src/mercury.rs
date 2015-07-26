@@ -58,6 +58,7 @@ impl fmt::Display for MercuryMethod {
 
 impl MercuryManager {
     pub fn new() -> MercuryManager {
+        debug!("MercuryManager new");
         MercuryManager {
             next_seq: 0,
             pending: HashMap::new(),
@@ -168,6 +169,8 @@ impl MercuryManager {
 
 impl PacketHandler for MercuryManager {
     fn handle(&mut self, cmd: u8, data: Vec<u8>) {
+        debug!("MercuryManager handle");
+
         let mut packet = Cursor::new(data);
 
         let seq = {
@@ -176,6 +179,8 @@ impl PacketHandler for MercuryManager {
             packet.read_all(&mut seq).unwrap();
             seq
         };
+
+        debug!("MercuryManager handle 2");
         let flags = packet.read_u8().unwrap();
         let count = packet.read_u16::<BigEndian>().unwrap() as usize;
 
@@ -192,6 +197,8 @@ impl PacketHandler for MercuryManager {
             return
         };
 
+        debug!("MercuryManager handle 3");
+
         for i in 0..count {
             let mut part = Self::parse_part(&mut packet);
             if let Some(mut data) = replace(&mut pending.partial, None) {
@@ -206,11 +213,14 @@ impl PacketHandler for MercuryManager {
             }
         }
 
+        debug!("MercuryManager handle 4");
+
         if flags == 0x1 {
+            debug!("MercuryManager handle complete");
             self.complete_request(cmd, pending);
         } else {
+            debug!("MercuryManager handle pending..");
             self.pending.insert(seq, pending);
         }
     }
 }
-

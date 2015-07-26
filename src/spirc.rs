@@ -61,6 +61,7 @@ pub trait SpircState {
 impl <'s, D: SpircDelegate> SpircManager<'s, D> {
     pub fn new(session: &'s Session, delegate: D,
                username: String, name: String) -> SpircManager<'s, D> {
+        debug!("SpircManager init");
         SpircManager {
             delegate: delegate,
             session: &session,
@@ -92,6 +93,8 @@ impl <'s, D: SpircDelegate> SpircManager<'s, D> {
     pub fn run(&mut self) {
         let rx = self.session.mercury_sub(format!("hm://remote/user/{}/v23", self.username));
         let updates = self.delegate.updates();
+
+        debug!("SpircManager run");
 
         loop {
             select! {

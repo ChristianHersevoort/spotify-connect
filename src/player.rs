@@ -2,6 +2,7 @@ use portaudio;
 use vorbis;
 use std::sync::{mpsc, Mutex, Arc, Condvar, MutexGuard};
 use std::thread;
+use log::LogLevel;
 
 use metadata::TrackRef;
 use session::Session;
@@ -76,8 +77,19 @@ impl <'s> Player<'s> {
 
 impl <'s> PlayerInternal<'s> {
     fn run(self) {
+        debug!("Initialing portaudio");
         portaudio::initialize().unwrap();
+        debug!("Initialized portaudio");
 
+        if log_enabled!(LogLevel::Trace) {
+            trace!("Available portaudio devices:");
+            for i in (0 .. portaudio::device::get_count().unwrap()) {
+                match portaudio::device::get_info(i) {
+                    None => {},
+                    Some(info) => trace!("{}: {}", i, info.name),
+                }
+            }
+        }
         let stream = portaudio::stream::Stream::<i16>::open_default(
                 0, 2, 44100.0,
                 portaudio::stream::FRAMES_PER_BUFFER_UNSPECIFIED,

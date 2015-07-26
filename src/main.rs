@@ -2,6 +2,9 @@
 #![feature(result_expect)]
 #![allow(deprecated)]
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 extern crate getopts;
 extern crate librespot;
 extern crate rpassword;
@@ -27,6 +30,9 @@ fn usage(program: &str, opts: &Options) -> String {
 }
 
 fn main() {
+    // initialize logger
+    env_logger::init().unwrap();
+
     let args: Vec<String> = std::env::args().collect();
     let program = args[0].clone();
 
@@ -74,6 +80,7 @@ fn main() {
     let poll_thread = thread::scoped(|| {
         loop {
             session.poll();
+            trace!("session.poll() - tick");
         }
     });
 

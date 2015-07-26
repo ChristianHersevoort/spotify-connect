@@ -7,6 +7,9 @@
 #![plugin(protobuf_macros)]
 #[macro_use] extern crate lazy_static;
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
 
 extern crate byteorder;
 extern crate crypto;
